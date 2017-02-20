@@ -38,25 +38,31 @@ def get_github_languages_yml()
   IO.copy_stream(yml_uri, "languages.yml")
 end
 
-client = setup_client(ARGV[0])
+def main()
+  client = setup_client(ARGV[0])
 
-get_github_languages_yml
+  get_github_languages_yml
 
-parsed = YAML.load_file("languages.yml")
+  parsed = YAML.load_file("languages.yml")
 
-BLOCK = "  "
-get_starred_repos(client, ARGV[0]).each_with_index do |x, index|
-
-  if parsed.has_key? x
-    color  = parsed[x]["color"]
-  else
-    color = "#000000"
+  block = "  "
+  get_starred_repos(client, ARGV[0]).each_with_index do |x, index|
+    if parsed.has_key? x
+      color  = parsed[x]["color"]
+    else
+      color = "#000000"
+    end
+    begin
+      print Rainbow(block).bg(color).bright
+    rescue NoMethodError
+      print Rainbow(block).bg(:black)
+    end
   end
-  begin
-    print Rainbow(BLOCK).bg(color).bright
-  rescue NoMethodError
-    print Rainbow(BLOCK).bg(:black)
-  end
+  puts
 end
-puts
 
+if ! ARGV[0]
+  puts "usage: starbannerz.rb <github_username>"
+else
+  main()
+end
